@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# check if .bin directory exists, if not create it
+if [ ! -f ".bin/packager" ]; then
+    mkdir .bin
+    wget https://github.com/shaka-project/shaka-packager/releases/download/v3.5.0/packager-linux-x64 -O .bin/packager
+    chmod +x .bin/packager
+    echo "Downloaded packager to .bin/packager"
+else
+    echo "packager is already installed, skipping download"
+fi
+
+echo "run below command to add it to your PATH"
+echo "export PATH=$(pwd)/.bin:\$PATH"
