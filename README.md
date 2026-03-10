@@ -1,9 +1,12 @@
 # SHAKA
 
-## Download Sample Content
+## Initialize the Environment
+
+- Fetch the Shaka Packager
+- Download sample assets to play around with
 
 ```bash
-wget http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4
+./scripts/init.sh
 ```
 
 ## REFS
