@@ -1,3 +1,5 @@
 .bin
-BigBuckBunny.mp4
+*.mp4
+*.m3u8
+*.mpd
 node_modules

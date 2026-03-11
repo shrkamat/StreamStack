@@ -21,3 +21,5 @@ if [ ! -d "assets" ]; then
 else
     echo "assets are already downloaded, skipping download"
 fi
+
+make -C assets

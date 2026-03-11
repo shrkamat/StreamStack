@@ -1,9 +1,18 @@
 # SHAKA
 
+## Goals
+
+- [ ] Create CMAF packages using Shaka Packager
+- [ ] Playback with shaka-player
+- [ ] Trickplay
+- [ ] Live streaming
+- [ ] DRM
+
 ## Initialize the Environment
 
 - Fetch the Shaka Packager
 - Download sample assets to play around with
+- Package with Shaka Packager
 
 ```bash
 ./scripts/init.sh
