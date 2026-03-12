@@ -25,7 +25,7 @@ echo "Output directory: $OUTDIR"
 
 cd "$OUTDIR"
 
-echo "Scaling to 360p..."
+echo "Transcoding to 360p..."
 ffmpeg -i "$INPUT" -c:a copy \
   -vf "scale=-2:360" \
   -c:v libx264 -profile:v baseline -level:v 3.0 \
@@ -33,7 +33,7 @@ ffmpeg -i "$INPUT" -c:a copy \
   -minrate 600k -maxrate 600k -bufsize 600k -b:v 600k \
   -y h264_baseline_360p_600.mp4
 
-echo "Scaling to 480p..."
+echo "Transcoding to 480p..."
 ffmpeg -i "$INPUT" -c:a copy \
   -vf "scale=-2:480" \
   -c:v libx264 -profile:v main -level:v 3.1 \
@@ -41,7 +41,7 @@ ffmpeg -i "$INPUT" -c:a copy \
   -minrate 1000k -maxrate 1000k -bufsize 1000k -b:v 1000k \
   -y h264_main_480p_1000.mp4
 
-echo "Scaling to 720p..."
+echo "Transcoding to 720p..."
 ffmpeg -i "$INPUT" -c:a copy \
   -vf "scale=-2:720" \
   -c:v libx264 -profile:v main -level:v 4.0 \
@@ -50,7 +50,7 @@ ffmpeg -i "$INPUT" -c:a copy \
   -y h264_main_720p_3000.mp4
 
 
-echo "Scaling to 1080p..."
+echo "Transcoding to 1080p..."
 ffmpeg -i "$INPUT" -c:a copy \
   -vf "scale=-2:1080" \
   -c:v libx264 -profile:v high -level:v 4.2 \
