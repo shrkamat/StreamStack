@@ -23,3 +23,5 @@ fi
 
 source .devenv
 make -C assets
+
+python3 scripts/media-server.py assets

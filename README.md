@@ -26,3 +26,4 @@
 
 - [Shaka Packager Tutorials](https://shaka-project.github.io/shaka-packager/html/tutorials/tutorials.html)
 - [Sample Video Assets](https://gist.github.com/jsturgis/3b19447b304616f18657?permalink_comment_id=3814125)
+- [Python http.server address CORS](https://fpira.com/blog/2020/05/python-http-server-with-cors)
