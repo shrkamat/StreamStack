@@ -5,9 +5,10 @@
 - [ ] Create CMAF packages using Shaka Packager
   - [x] Basic packaging is done (both hls & dash)
 - [ ] Playback with shaka-player
-  - [ ] Basic dash player
-  - [ ] Basic hls player
+  - [x] Basic dash player
+  - [x] Basic hls player
   - [ ] Basic cmaf player
+- [ ] Understand Shaka player APIs
 - [ ] Trickplay
 - [ ] Live streaming
 - [ ] DRM

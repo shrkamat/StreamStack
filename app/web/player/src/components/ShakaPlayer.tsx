@@ -32,8 +32,8 @@ function ShakaPlayer({ src }: ShakaPlayerProps) {
         .then(() => {
           console.log("The video has been loaded successfully.");
         })
-        .catch((error) => {
-          console.error("Error loading video:", error);
+        .catch((err) => {
+          console.error("Error loading video:", err);
         });
 
       // TODO: autoplay
