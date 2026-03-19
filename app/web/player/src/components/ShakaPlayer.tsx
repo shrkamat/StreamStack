@@ -38,6 +38,13 @@ function ShakaPlayer({ src }: ShakaPlayerProps) {
 
         player.addEventListener("error", onErrorEvent);
 
+        player.configure({
+          preferredAudioLanguage: "el",
+          streaming: {
+            bufferingGoal: 60,
+          },
+        });
+
         try {
           await player.load(videoSrc);
         } catch (err) {
@@ -51,6 +58,10 @@ function ShakaPlayer({ src }: ShakaPlayerProps) {
         //   });
         // }
         playerRef.current = player;
+
+        if (isDebug) {
+          window.player = player; // Expose player for debugging
+        }
       } else {
         console.error("Shaka Player is not supported in this browser.");
       }
