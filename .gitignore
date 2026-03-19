@@ -3,3 +3,9 @@
 *.m3u8
 *.mpd
 node_modules
+
+app/web/mp4analyzer
+app/web/mp4box.js
+app/web/mp4parser
+
+docs

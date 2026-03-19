@@ -16,36 +16,38 @@ function ShakaPlayer({ src }: ShakaPlayerProps) {
   }
 
   useEffect(() => {
-    console.log("Initializing Shaka Player with source:", videoSrc);
+    const initPlayer = async () => {
+      console.log("Initializing Shaka Player with source:", videoSrc);
+      shaka.polyfill.installAll();
 
-    // Check if the browser supports the Shaka Player
-    if (shaka.Player.isBrowserSupported()) {
-      console.log("Shaka Player is supported in this browser.");
+      // Check if the browser supports the Shaka Player
+      if (shaka.Player.isBrowserSupported()) {
+        console.log("Shaka Player is supported in this browser.");
 
-      const player = new shaka.Player(videoRef.current);
-      player.attach(videoRef.current!);
+        const player = new shaka.Player(videoRef.current);
+        await player.attach(videoRef.current!);
 
-      player.addEventListener("error", onErrorEvent);
+        player.addEventListener("error", onErrorEvent);
 
-      player
-        .load(videoSrc)
-        .then(() => {
-          console.log("The video has been loaded successfully.");
-        })
-        .catch((err) => {
+        try {
+          await player.load(videoSrc);
+        } catch (err) {
           console.error("Error loading video:", err);
-        });
+        }
 
-      // TODO: autoplay
-      // if (videoRef.current?.autoplay) {
-      //   player.play().catch((error: any) => {
-      //     console.error("Error playing video:", error);
-      //   });
-      // }
-      playerRef.current = player;
-    } else {
-      console.error("Shaka Player is not supported in this browser.");
-    }
+        // TODO: autoplay
+        // if (videoRef.current?.autoplay) {
+        //   player.play().catch((error: any) => {
+        //     console.error("Error playing video:", error);
+        //   });
+        // }
+        playerRef.current = player;
+      } else {
+        console.error("Shaka Player is not supported in this browser.");
+      }
+    };
+
+    initPlayer();
 
     return () => {
       // cleanup here
@@ -59,7 +61,13 @@ function ShakaPlayer({ src }: ShakaPlayerProps) {
   return (
     <div>
       <h4>Shaka player, {videoSrc}</h4>
-      <video ref={videoRef} width="100%" controls autoPlay></video>
+      <video
+        ref={videoRef}
+        width="100%"
+        poster="/shaka_logo.png"
+        controls
+        autoPlay
+      ></video>
     </div>
   );
 }
