@@ -1,4 +1,9 @@
-import shaka from "shaka-player/dist/shaka-player.ui.js";
+const isDebug: boolean = true;
+
+const shaka = isDebug
+  ? (await import("shaka-player/dist/shaka-player.compiled.debug.js")).default
+  : (await import("shaka-player/dist/shaka-player.ui.js")).default;
+// Debug version of the player
 import { useState, useRef, useEffect } from "react";
 
 // Define the shape of the props the component accepts
@@ -17,6 +22,10 @@ function ShakaPlayer({ src }: ShakaPlayerProps) {
 
   useEffect(() => {
     const initPlayer = async () => {
+      if (isDebug) {
+        (shaka as any).log.setLevel((shaka as any).log.Level.V1);
+      }
+
       console.log("Initializing Shaka Player with source:", videoSrc);
       shaka.polyfill.installAll();
 
