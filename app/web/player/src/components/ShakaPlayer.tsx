@@ -42,6 +42,18 @@ function ShakaPlayer({ src }: ShakaPlayerProps) {
           preferredAudioLanguage: "el",
           streaming: {
             bufferingGoal: 60,
+            retryParameters: {
+              maxAttempts: 2,
+              baseDelay: 500,
+              backoffFactor: 2,
+              fuzzFactor: 0.5,
+            },
+          },
+          drm: {
+            servers: {
+              "com.widevine.alpha":
+                "https://license.uat.widevine.com/cenc/getcontentkey/widevine_test",
+            },
           },
         });
 
