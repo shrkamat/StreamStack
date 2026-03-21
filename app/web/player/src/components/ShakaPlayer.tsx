@@ -102,6 +102,10 @@ function ShakaPlayer({ src }: ShakaPlayerProps) {
               "com.widevine.alpha":
                 "https://proxy.uat.widevine.com/proxy?provider=widevine_test",
             },
+            clearKeys: {
+              "00112233445566778899aabbccddeeff":
+                "ffeeddccbbaa99887766554433221100",
+            },
             logLicenseExchange: true,
           },
         });

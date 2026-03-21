@@ -68,7 +68,7 @@ echo "Packaging with Shaka Packager..."
 
 # Below command is taken from https://shaka-project.github.io/shaka-packager/html/tutorials/dash.html
 # Section: Output DASH + HLS with dash_only and hls_only options:
-echo "Packaging clear (non-DRM) version..."
+echo "Packaging plain (non-DRM) version..."
 packager \
   'in=h264_baseline_360p_600.mp4,stream=audio,init_segment=clear/audio/init.mp4,segment_template=clear/audio/$Number$.m4s' \
   'in=h264_baseline_360p_600.mp4,stream=video,init_segment=clear/h264_360p/init.mp4,segment_template=clear/h264_360p/$Number$.m4s' \
@@ -94,6 +94,20 @@ packager \
   --key_server_url https://license.uat.widevine.com/cenc/getcontentkey/widevine_test \
   --generate_static_live_mpd --mpd_output drm/h264.mpd \
   --hls_master_playlist_output drm/h264_master.m3u8
+
+packager \
+  'in=h264_baseline_360p_600.mp4,stream=audio,init_segment=clearkey/audio/init.mp4,segment_template=clearkey/audio/$Number$.m4s,skip_encryption=1' \
+  'in=h264_baseline_360p_600.mp4,stream=video,init_segment=clearkey/h264_360p/init.mp4,segment_template=clearkey/h264_360p/$Number$.m4s' \
+  'in=h264_main_480p_1000.mp4,stream=video,init_segment=clearkey/h264_480p/init.mp4,segment_template=clearkey/h264_480p/$Number$.m4s' \
+  'in=h264_main_720p_3000.mp4,stream=video,init_segment=clearkey/h264_720p/init.mp4,segment_template=clearkey/h264_720p/$Number$.m4s' \
+  'in=h264_high_1080p_6000.mp4,stream=video,init_segment=clearkey/h264_1080p/init.mp4,segment_template=clearkey/h264_1080p/$Number$.m4s' \
+  --enable_raw_key_encryption \
+  --keys label=:key_id=00112233445566778899aabbccddeeff:key=ffeeddccbbaa99887766554433221100 \
+  --clear_lead 0 \
+  --protection_systems CommonSystem \
+  --generate_static_live_mpd \
+  --mpd_output clearkey/h264.mpd \
+  --hls_master_playlist_output clearkey/h264_master.m3u8
 
 echo ""
 echo "Packaging complete."

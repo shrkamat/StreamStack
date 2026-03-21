@@ -34,8 +34,9 @@
 - [ ] Diagnostics
 - [ ] Trickplay
 - [ ] Live streaming
-- [ ] DRM - sk
-  - [ ] Widevine
+- [x] DRM
+  - [x] Widevine
+  - [x] ClearKey
 
 ## Initialize the Environment
 
