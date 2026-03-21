@@ -68,19 +68,33 @@ echo "Packaging with Shaka Packager..."
 
 # Below command is taken from https://shaka-project.github.io/shaka-packager/html/tutorials/dash.html
 # Section: Output DASH + HLS with dash_only and hls_only options:
+echo "Packaging clear (non-DRM) version..."
 packager \
-  'in=h264_baseline_360p_600.mp4,stream=audio,init_segment=audio/init.mp4,segment_template=audio/$Number$.m4s' \
-  'in=h264_baseline_360p_600.mp4,stream=video,init_segment=h264_360p/init.mp4,segment_template=h264_360p/$Number$.m4s' \
-  'in=h264_main_480p_1000.mp4,stream=video,init_segment=h264_480p/init.mp4,segment_template=h264_480p/$Number$.m4s' \
-  'in=h264_main_720p_3000.mp4,stream=video,init_segment=h264_720p/init.mp4,segment_template=h264_720p/$Number$.m4s' \
-  'in=h264_high_1080p_6000.mp4,stream=video,init_segment=h264_1080p/init.mp4,segment_template=h264_1080p/$Number$.m4s' \
-  # --enable_widevine_encryption \
-  # --content_id 746573745f636f6e74656e745f6964 \
-  # --key_server_url https://license.uat.widevine.com/cenc/getcontentkey/widevine_test \
-  --generate_static_live_mpd --mpd_output h264.mpd \
-  --hls_master_playlist_output h264_master.m3u
+  'in=h264_baseline_360p_600.mp4,stream=audio,init_segment=clear/audio/init.mp4,segment_template=clear/audio/$Number$.m4s' \
+  'in=h264_baseline_360p_600.mp4,stream=video,init_segment=clear/h264_360p/init.mp4,segment_template=clear/h264_360p/$Number$.m4s' \
+  'in=h264_main_480p_1000.mp4,stream=video,init_segment=clear/h264_480p/init.mp4,segment_template=clear/h264_480p/$Number$.m4s' \
+  'in=h264_main_720p_3000.mp4,stream=video,init_segment=clear/h264_720p/init.mp4,segment_template=clear/h264_720p/$Number$.m4s' \
+  'in=h264_high_1080p_6000.mp4,stream=video,init_segment=clear/h264_1080p/init.mp4,segment_template=clear/h264_1080p/$Number$.m4s' \
+  --generate_static_live_mpd --mpd_output clear/h264.mpd \
+  --hls_master_playlist_output clear/h264_master.m3u8
+
+echo "Packaging DRM version..."
+packager \
+  'in=h264_baseline_360p_600.mp4,stream=audio,init_segment=drm/audio/init.mp4,segment_template=drm/audio/$Number$.m4s,skip_encryption=1' \
+  'in=h264_baseline_360p_600.mp4,stream=video,init_segment=drm/h264_360p/init.mp4,segment_template=drm/h264_360p/$Number$.m4s' \
+  'in=h264_main_480p_1000.mp4,stream=video,init_segment=drm/h264_480p/init.mp4,segment_template=drm/h264_480p/$Number$.m4s' \
+  'in=h264_main_720p_3000.mp4,stream=video,init_segment=drm/h264_720p/init.mp4,segment_template=drm/h264_720p/$Number$.m4s' \
+  'in=h264_high_1080p_6000.mp4,stream=video,init_segment=drm/h264_1080p/init.mp4,segment_template=drm/h264_1080p/$Number$.m4s' \
+  --enable_widevine_encryption \
+  --clear_lead 0 \
+  --content_id 746573745f636f6e74656e745f6964 \
+  --signer widevine_test \
+  --aes_signing_key 1ae8ccd0e7985cc0b6203a55855a1034afc252980e970ca90e5202689f947ab9 \
+  --aes_signing_iv d58ce954203b7c9a9a9d467f59839249 \
+  --key_server_url https://license.uat.widevine.com/cenc/getcontentkey/widevine_test \
+  --generate_static_live_mpd --mpd_output drm/h264.mpd \
+  --hls_master_playlist_output drm/h264_master.m3u8
 
 echo ""
 echo "Packaging complete."
 echo "Output located in: $OUTDIR"
-

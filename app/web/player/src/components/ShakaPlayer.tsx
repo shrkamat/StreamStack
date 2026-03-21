@@ -13,13 +13,19 @@ const isDebug: boolean = true;
 const useShakaUI: boolean = true;
 
 const shaka: ShakaUiModule & {
-  log?: { Level: { V1: number }; setLevel(level: number): void };
+  log?: {
+    Level: { V1: number; V2: number; DEBUG: number };
+    setLevel(level: number): void;
+  };
 } = (isDebug
   ? // ? (await import("shaka-player/dist/shaka-player.compiled.debug.js")).default
     (await import("shaka-player/dist/shaka-player.ui.debug.js")).default
   : (await import("shaka-player/dist/shaka-player.ui.js"))
       .default) as unknown as ShakaUiModule & {
-  log?: { Level: { V1: number }; setLevel(level: number): void };
+  log?: {
+    Level: { V1: number; V2: number; DEBUG: number };
+    setLevel(level: number): void;
+  };
 };
 
 // Define the shape of the props the component accepts
@@ -38,9 +44,13 @@ function ShakaPlayer({ src }: ShakaPlayerProps) {
   }
 
   useEffect(() => {
+    let isMounted: boolean = true;
+    // TODO: understand this type definition, isn't there a Shaka provided type ?
+    let uiOverlay: { destroy: () => void } | null = null;
+
     const initPlayer = async () => {
       if (isDebug && shaka.log) {
-        shaka.log.setLevel(shaka.log.Level.V1);
+        shaka.log.setLevel(shaka.log.Level.V2);
       }
 
       console.log("Initializing Shaka Player with source:", videoSrc);
@@ -50,13 +60,26 @@ function ShakaPlayer({ src }: ShakaPlayerProps) {
       if (shaka.Player.isBrowserSupported()) {
         console.log("Shaka Player is supported in this browser.");
 
-        const player = new shaka.Player(videoRef.current);
-        await player.attach(videoRef.current!);
+        const player = new shaka.Player();
+        playerRef.current = player; // Synchronously set ref for correct cleanup
+
+        try {
+          await player.attach(videoRef.current!);
+        } catch (e) {
+          if (isMounted) console.error("Error attaching player:", e);
+          return;
+        }
+
+        if (!isMounted) return;
 
         if (useShakaUI) {
           const overlayCtor = shaka.ui?.Overlay;
           if (overlayCtor && containerRef.current && videoRef.current) {
-            new overlayCtor(player, containerRef.current, videoRef.current);
+            uiOverlay = new overlayCtor(
+              player,
+              containerRef.current,
+              videoRef.current,
+            );
           }
         }
 
@@ -75,27 +98,21 @@ function ShakaPlayer({ src }: ShakaPlayerProps) {
           },
           drm: {
             servers: {
+              // Use the proxy configured with CORS for the widevine_test provider
               "com.widevine.alpha":
-                "https://license.uat.widevine.com/cenc/getcontentkey/widevine_test",
+                "https://proxy.uat.widevine.com/proxy?provider=widevine_test",
             },
+            logLicenseExchange: true,
           },
         });
 
         try {
           await player.load(videoSrc);
         } catch (err) {
-          console.error("Error loading video:", err);
+          if (isMounted) console.error("Error loading video:", err);
         }
 
-        // TODO: autoplay
-        // if (videoRef.current?.autoplay) {
-        //   player.play().catch((error: any) => {
-        //     console.error("Error playing video:", error);
-        //   });
-        // }
-        playerRef.current = player;
-
-        if (isDebug) {
+        if (isDebug && isMounted) {
           window.player = player; // Expose player for debugging
         }
       } else {
@@ -106,11 +123,21 @@ function ShakaPlayer({ src }: ShakaPlayerProps) {
     initPlayer();
 
     return () => {
-      // cleanup here
+      isMounted = false;
       console.log("Cleaning up Shaka Player resources.");
-      playerRef.current?.destroy().catch((error: unknown) => {
-        console.error("Error destroying Shaka Player:", error);
-      });
+      if (uiOverlay) {
+        try {
+          uiOverlay.destroy();
+        } catch (err) {
+          console.error("Failed to destroy Shaka ui overlay:", err);
+        }
+      }
+      if (playerRef.current) {
+        playerRef.current.destroy().catch((error: unknown) => {
+          console.error("Error destroying Shaka Player:", error);
+        });
+        playerRef.current = null;
+      }
     };
   }, [videoSrc]);
 
