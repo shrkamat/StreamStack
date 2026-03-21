@@ -1,10 +1,26 @@
-const isDebug: boolean = true;
-
-const shaka = isDebug
-  ? (await import("shaka-player/dist/shaka-player.compiled.debug.js")).default
-  : (await import("shaka-player/dist/shaka-player.ui.js")).default;
-// Debug version of the player
 import { useState, useRef, useEffect } from "react";
+type ShakaUiModule = typeof import("shaka-player/dist/shaka-player.ui").default;
+type ShakaPlayerInstance = InstanceType<ShakaUiModule["Player"]>;
+
+// Extend Window interface
+declare global {
+  interface Window {
+    player?: ShakaPlayerInstance;
+  }
+}
+
+const isDebug: boolean = true;
+const useShakaUI: boolean = true;
+
+const shaka: ShakaUiModule & {
+  log?: { Level: { V1: number }; setLevel(level: number): void };
+} = (isDebug
+  ? // ? (await import("shaka-player/dist/shaka-player.compiled.debug.js")).default
+    (await import("shaka-player/dist/shaka-player.ui.debug.js")).default
+  : (await import("shaka-player/dist/shaka-player.ui.js"))
+      .default) as unknown as ShakaUiModule & {
+  log?: { Level: { V1: number }; setLevel(level: number): void };
+};
 
 // Define the shape of the props the component accepts
 interface ShakaPlayerProps {
@@ -13,17 +29,18 @@ interface ShakaPlayerProps {
 
 function ShakaPlayer({ src }: ShakaPlayerProps) {
   const [videoSrc] = useState<string>(src);
+  const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const playerRef = useRef<shaka.Player | null>(null);
+  const playerRef = useRef<ShakaPlayerInstance | null>(null);
 
-  function onErrorEvent(event: any) {
+  function onErrorEvent(event: unknown) {
     console.error("Shaka Player error event:", event);
   }
 
   useEffect(() => {
     const initPlayer = async () => {
-      if (isDebug) {
-        (shaka as any).log.setLevel((shaka as any).log.Level.V1);
+      if (isDebug && shaka.log) {
+        shaka.log.setLevel(shaka.log.Level.V1);
       }
 
       console.log("Initializing Shaka Player with source:", videoSrc);
@@ -35,6 +52,13 @@ function ShakaPlayer({ src }: ShakaPlayerProps) {
 
         const player = new shaka.Player(videoRef.current);
         await player.attach(videoRef.current!);
+
+        if (useShakaUI) {
+          const overlayCtor = shaka.ui?.Overlay;
+          if (overlayCtor && containerRef.current && videoRef.current) {
+            new overlayCtor(player, containerRef.current, videoRef.current);
+          }
+        }
 
         player.addEventListener("error", onErrorEvent);
 
@@ -84,22 +108,35 @@ function ShakaPlayer({ src }: ShakaPlayerProps) {
     return () => {
       // cleanup here
       console.log("Cleaning up Shaka Player resources.");
-      playerRef.current?.destroy().catch((error: any) => {
+      playerRef.current?.destroy().catch((error: unknown) => {
         console.error("Error destroying Shaka Player:", error);
       });
     };
-  }, []);
+  }, [videoSrc]);
 
   return (
     <div>
       <h4>Shaka player, {videoSrc}</h4>
-      <video
-        ref={videoRef}
-        width="100%"
-        poster="/shaka_logo.png"
-        controls
-        autoPlay
-      ></video>
+      <div id="video-bar" className="hidden">
+        <div
+          ref={containerRef}
+          data-shaka-player-container
+          className="video-container"
+        >
+          <video
+            id="video"
+            ref={videoRef}
+            width="100%"
+            height="100%"
+            poster="/shaka_logo.png"
+            data-shaka-player
+            playsInline
+            controls={!useShakaUI}
+            autoPlay
+            crossOrigin="anonymous"
+          ></video>
+        </div>
+      </div>
     </div>
   );
 }
