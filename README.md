@@ -4,15 +4,38 @@
 
 - [ ] Create CMAF (Common Media Application Format) packages using Shaka Packager
   - [x] Basic packaging is done (both hls & dash)
-  - [ ] MP4 deep dive
+  - [ ] MP4 deep dive - sk
   - [ ] CMAF deep dive
 - [ ] Playback with shaka-player
   - [x] Basic dash playback
   - [x] Basic hls playback
-- [ ] Understand Shaka player APIs
+  - [ ] Understand Shaka player APIs
+  - [ ] UI, Configuring UI - sk
+  - [ ] Configuring text displayer - sk
+  - [ ] Screen resolution detection - kk
+  - [ ] Error Handling - kk
+  - [ ] Creating accessible buttons - sk
+  - [ ] Monetization with Ads - kk
+  - [ ] Plugins and Customizing the Build - sk
+  - [ ] Manifest Parser Plugins
+  - [ ] Architecture Diagrams
+  - [ ] Service Worker Caching
+  - [ ] Offline Storage and Playback
+  - [ ] Widevine Service Certificates
+  - [ ] FairPlay support
+  - [ ] Application-Level Redirects
+  - [ ] Blob URL
+  - [ ] Selenium Grid Config
+  - [ ] Frequently Asked Questions
+  - [ ] Upgrade Guide
+  - [ ] ManifestParser Upgrade Guide
+  - [ ] LCEVC Quick Start
+  - [ ] Accessibility
+- [ ] Diagnostics
 - [ ] Trickplay
 - [ ] Live streaming
-- [ ] DRM
+- [ ] DRM - sk
+  - [ ] Widevine
 
 ## Initialize the Environment
 

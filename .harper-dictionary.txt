@@ -1,1 +1,8 @@
+FairPlay
+LCEVC
+ManifestParser
 SHAKA
+Trickplay
+Widevine
+sk
+hls
