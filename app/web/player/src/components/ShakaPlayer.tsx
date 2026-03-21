@@ -132,6 +132,7 @@ function ShakaPlayer({ src }: ShakaPlayerProps) {
             data-shaka-player
             playsInline
             controls={!useShakaUI}
+            muted
             autoPlay
             crossOrigin="anonymous"
           ></video>
