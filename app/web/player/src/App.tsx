@@ -27,7 +27,6 @@ const ASSETS: Record<string, ShakaPlayerProps> = {
     src: "http://localhost:8080/BigBuckBunny/clearkey/h264_master.m3u8",
     drmConfig: {
       clearKeys: {
-        "05e7c9d9b1f1a2e3d4c5b6a7f8e9d0c1": "0123456789abcdef0123456789abcdef",
         "00112233445566778899aabbccddeeff": "ffeeddccbbaa99887766554433221100",
       },
     },
