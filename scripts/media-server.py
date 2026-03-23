@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from http.server import HTTPServer, SimpleHTTPRequestHandler
+from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from functools import partial
 import sys
 
@@ -24,7 +24,7 @@ directory = sys.argv[1] if len(sys.argv) > 1 else "."
 port = int(sys.argv[2]) if len(sys.argv) > 2 else 8080
 print(f"Serving {directory} on {port}")
 
-HTTPServer(
+ThreadingHTTPServer(
     ("0.0.0.0", port),
     partial(Handler, directory=directory)
 ).serve_forever()

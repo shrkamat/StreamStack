@@ -9,11 +9,11 @@ function App() {
       {/* <ShakaPlayer src="http://localhost:8080/BigBuckBunny/clear/h264.mpd" /> */}
       {/* <ShakaPlayer src="https://test-streams.mux.dev/x36xhzz/url_0/193039199_mp4_h264_aac_hd_7.m3u8" /> */}
       {/* <ShakaPlayer src="http://localhost:8080/BigBuckBunny/clear/h264_master.m3u8" /> */}
-      {/* <ShakaPlayer src="http://localhost:8080/BigBuckBunny/clearkey/h264_master.m3u8" /> */}
+      <ShakaPlayer src="http://localhost:8080/BigBuckBunny/clearkey/h264_master.m3u8" />
       {/* Simulate error */}
       {/* <ShakaPlayer src="https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mp" /> */}
       {/* with drm */}
-      <ShakaPlayer src="http://localhost:8080/BigBuckBunny/drm/h264.mpd" />
+      {/* <ShakaPlayer src="http://localhost:8080/BigBuckBunny/drm/h264.mpd" /> */}
     </>
   );
 }
