@@ -86,6 +86,7 @@ export function ShakaPlayer({ src, drmConfig }: ShakaPlayerProps) {
         }
 
         player.addEventListener("error", onErrorEvent);
+        player.setVideoContainer(containerRef.current!);
 
         player.configure({
           preferredAudioLanguage: "el",
@@ -102,6 +103,10 @@ export function ShakaPlayer({ src, drmConfig }: ShakaPlayerProps) {
             servers: drmConfig?.servers,
             clearKeys: drmConfig?.clearKeys,
             logLicenseExchange: true,
+          },
+          textDisplayer: {
+            fontScaleFactor: 1.5,
+            positionArea: shaka.config.PositionArea.CENTER,
           },
         });
 
@@ -154,7 +159,7 @@ export function ShakaPlayer({ src, drmConfig }: ShakaPlayerProps) {
             ref={videoRef}
             width="100%"
             height="100%"
-            poster="/shaka_logo.png"
+            poster="https://shaka-player-demo.appspot.com/assets/poster.jpg"
             data-shaka-player
             playsInline
             controls={!useShakaUI}

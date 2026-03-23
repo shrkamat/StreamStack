@@ -49,10 +49,14 @@ const ASSETS: Record<string, ShakaPlayerProps> = {
   "CDN HBO AD MP4": {
     src: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
   },
+  // 9
+  "SHAKA CAPTION / MULTILANGUAGE": {
+    src: "https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd",
+  },
 };
 
 const ASSET_KEYS = Object.keys(ASSETS);
-const DEFAULT_ASSET_KEY = ASSET_KEYS[7];
+const DEFAULT_ASSET_KEY = ASSET_KEYS[9];
 
 function App() {
   const asset: ShakaPlayerProps = ASSETS[DEFAULT_ASSET_KEY];
