@@ -54,3 +54,4 @@
 - [Shaka Player Tutorial](https://shaka-player-demo.appspot.com/docs/api/tutorial-welcome.html)
 - [Sample Video Assets](https://gist.github.com/jsturgis/3b19447b304616f18657?permalink_comment_id=3814125)
 - [Python http.server address CORS](https://fpira.com/blog/2020/05/python-http-server-with-cors)
+- [Netflix cadmium player](https://github.com/hoonseokkim/netflix-cadmium-player)

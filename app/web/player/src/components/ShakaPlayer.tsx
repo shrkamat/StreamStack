@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 type ShakaUiModule = typeof import("shaka-player/dist/shaka-player.ui").default;
 type ShakaPlayerInstance = InstanceType<ShakaUiModule["Player"]>;
 
@@ -29,12 +29,15 @@ const shaka: ShakaUiModule & {
 };
 
 // Define the shape of the props the component accepts
-interface ShakaPlayerProps {
+export interface ShakaPlayerProps {
   src: string;
+  drmConfig?: {
+    servers?: Record<string, string>;
+    clearKeys?: Record<string, string>;
+  };
 }
 
-function ShakaPlayer({ src }: ShakaPlayerProps) {
-  const [videoSrc] = useState<string>(src);
+export function ShakaPlayer({ src, drmConfig }: ShakaPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const playerRef = useRef<ShakaPlayerInstance | null>(null);
@@ -53,7 +56,6 @@ function ShakaPlayer({ src }: ShakaPlayerProps) {
         shaka.log.setLevel(shaka.log.Level.V2);
       }
 
-      console.log("Initializing Shaka Player with source:", videoSrc);
       shaka.polyfill.installAll();
 
       // Check if the browser supports the Shaka Player
@@ -97,21 +99,14 @@ function ShakaPlayer({ src }: ShakaPlayerProps) {
             },
           },
           drm: {
-            servers: {
-              // Use the proxy configured with CORS for the widevine_test provider
-              "com.widevine.alpha":
-                "https://proxy.uat.widevine.com/proxy?provider=widevine_test",
-            },
-            clearKeys: {
-              "00112233445566778899aabbccddeeff":
-                "ffeeddccbbaa99887766554433221100",
-            },
+            servers: drmConfig?.servers,
+            clearKeys: drmConfig?.clearKeys,
             logLicenseExchange: true,
           },
         });
 
         try {
-          await player.load(videoSrc);
+          await player.load(src);
         } catch (err) {
           if (isMounted) console.error("Error loading video:", err);
         }
@@ -143,11 +138,11 @@ function ShakaPlayer({ src }: ShakaPlayerProps) {
         playerRef.current = null;
       }
     };
-  }, [videoSrc]);
+  });
 
   return (
     <div>
-      <h4>Shaka player, {videoSrc}</h4>
+      <h4>Shaka player, {src}</h4>
       <div id="video-bar" className="hidden">
         <div
           ref={containerRef}
@@ -172,5 +167,3 @@ function ShakaPlayer({ src }: ShakaPlayerProps) {
     </div>
   );
 }
-
-export default ShakaPlayer;
