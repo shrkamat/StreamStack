@@ -95,6 +95,7 @@ packager \
   --generate_static_live_mpd --mpd_output drm/h264.mpd \
   --hls_master_playlist_output drm/h264_master.m3u8
 
+echo "Packaging ClearKey version..."
 packager \
   'in=h264_baseline_360p_600.mp4,stream=audio,init_segment=clearkey/audio/init.mp4,segment_template=clearkey/audio/$Number$.m4s,skip_encryption=1' \
   'in=h264_baseline_360p_600.mp4,stream=video,init_segment=clearkey/h264_360p/init.mp4,segment_template=clearkey/h264_360p/$Number$.m4s' \
