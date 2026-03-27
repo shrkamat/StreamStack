@@ -14,7 +14,7 @@ echo "run below command to add it to your PATH"
 echo "export PATH=$(pwd)/.bin:\$PATH"
 
 # check if assets are downloaded, if not download them
-if [ ! -d "assets/BigBuckBunny" ]; then
+if [ ! -f "assets/BigBuckBunny.mp4" ]; then
     wget http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4 -O assets/BigBuckBunny.mp4
     echo "Downloaded sample mp4(s) to assets folder"
 else
