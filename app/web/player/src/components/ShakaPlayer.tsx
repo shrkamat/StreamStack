@@ -2,6 +2,10 @@ import { useRef, useEffect } from "react";
 type ShakaUiModule = typeof import("shaka-player/dist/shaka-player.ui").default;
 type ShakaPlayerInstance = InstanceType<ShakaUiModule["Player"]>;
 
+const DASH_AD_URI: string =
+  "http://localhost:8080/ForBiggerBlazes/clear/h264.mpd";
+const DASH_AD_MIME: string = "application/dash+xml";
+
 // Extend Window interface
 declare global {
   interface Window {
@@ -88,6 +92,77 @@ export function ShakaPlayer({ src, drmConfig }: ShakaPlayerProps) {
         player.addEventListener("error", onErrorEvent);
         player.setVideoContainer(containerRef.current!);
 
+        // Register custom interstitial ad (DASH) + log ad lifecycle.
+        const adManager = player.getAdManager();
+        if (adManager) {
+          adManager.addEventListener("ad-break-started", (e: unknown) => {
+            console.log("[ads] ad-break-started", e);
+          });
+          adManager.addEventListener("ad-started", (e: unknown) => {
+            console.log("[ads] ad-started", e);
+          });
+          adManager.addEventListener("ad-paused", (e: unknown) => {
+            console.log("[ads] ad-paused", e);
+          });
+          adManager.addEventListener("ad-resumed", (e: unknown) => {
+            console.log("[ads] ad-resumed", e);
+          });
+          adManager.addEventListener("ad-skipped", (e: unknown) => {
+            console.log("[ads] ad-skipped", e);
+          });
+          adManager.addEventListener("ad-complete", (e: unknown) => {
+            console.log("[ads] ad-complete", e);
+          });
+          adManager.addEventListener("ad-stopped", (e: unknown) => {
+            console.log("[ads] ad-stopped", e);
+          });
+          adManager.addEventListener("ad-break-ended", (e: unknown) => {
+            console.log("[ads] ad-break-ended", e);
+          });
+          adManager.addEventListener("ad-error", (e: unknown) => {
+            console.error("[ads] ad-error", e);
+          });
+
+          // NOTE: Shaka doesn't expose friendly TS typings for this config.
+          const interstitial: any = {
+            id: "dash-midroll-10s",
+            groupId: null,
+            startTime: 10,
+            endTime: null,
+            uri: DASH_AD_URI,
+            mimeType: DASH_AD_MIME,
+            isSkippable: true,
+            skipOffset: 5,
+            skipFor: null,
+            canJump: false,
+            resumeOffset: null,
+            playoutLimit: null,
+            once: true,
+            pre: false,
+            post: false,
+            timelineRange: false,
+            loop: false,
+            overlay: null,
+            displayOnBackground: false,
+            currentVideo: null,
+            background: null,
+            clickThroughUrl: null,
+            tracking: null,
+          };
+
+          try {
+            adManager.addCustomInterstitial(interstitial);
+            console.log("[ads] registered DASH interstitial", {
+              startTime: interstitial.startTime,
+              uri: interstitial.uri,
+            });
+          } catch (e) {
+            console.error("[ads] failed to register interstitial", e);
+          }
+        } else {
+          console.warn("[ads] player.getAdManager() returned null/undefined");
+        }
+
         player.configure({
           preferredAudioLanguage: "el",
           streaming: {
@@ -143,7 +218,7 @@ export function ShakaPlayer({ src, drmConfig }: ShakaPlayerProps) {
         playerRef.current = null;
       }
     };
-  });
+  }, [src, drmConfig]);
 
   return (
     <div>
