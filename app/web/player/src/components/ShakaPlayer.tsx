@@ -6,7 +6,7 @@ type ShakaUiModule = typeof import("shaka-player/dist/shaka-player.ui").default;
 type ShakaPlayerInstance = InstanceType<ShakaUiModule["Player"]>;
 
 const DASH_AD_URI: string =
-  "http://localhost:8080/ForBiggerBlazes/clear/h264.mpd";
+  "";
 const DASH_AD_MIME: string = "application/dash+xml";
 
 // Extend Window interface
@@ -19,32 +19,38 @@ declare global {
 const isDebug: boolean = true;
 const useShakaUI: boolean = true;
 
+// IMPORTANT: MOQT support requires the experimental build
+// Use experimental.debug.js for debug mode, experimental.js for production
 const shaka: ShakaUiModule & {
   log?: {
     Level: { V1: number; V2: number; DEBUG: number };
     setLevel(level: number): void;
   };
 } = (isDebug
-  ? // ? (await import("shaka-player/dist/shaka-player.compiled.debug.js")).default
-    (await import("shaka-player/dist/shaka-player.ui.debug.js")).default
-  : (await import("shaka-player/dist/shaka-player.ui.js"))
-      .default) as unknown as ShakaUiModule & {
-  log?: {
-    Level: { V1: number; V2: number; DEBUG: number };
-    setLevel(level: number): void;
-  };
-};
+  ? (await import("shaka-player/dist/shaka-player.experimental.debug.js"))
+    .default
+  : // Use experimental build (not UI) to support MOQT
+  (await import("shaka-player/dist/shaka-player.experimental.js"))
+    .default) as unknown as ShakaUiModule & {
+      log?: {
+        Level: { V1: number; V2: number; DEBUG: number };
+        setLevel(level: number): void;
+      };
+    };
 
 // Define the shape of the props the component accepts
 export interface ShakaPlayerProps {
   src: string;
+  mimeType?: string;
   drmConfig?: {
     servers?: Record<string, string>;
     clearKeys?: Record<string, string>;
   };
+  // For WebTransport with self-signed certs, provide fingerprint URL
+  fingerprintUri?: string;
 }
 
-export function ShakaPlayer({ src, drmConfig }: ShakaPlayerProps) {
+export function ShakaPlayer({ src, mimeType, drmConfig, fingerprintUri }: ShakaPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const playerRef = useRef<ShakaPlayerInstance | null>(null);
@@ -176,10 +182,35 @@ export function ShakaPlayer({ src, drmConfig }: ShakaPlayerProps) {
               fuzzFactor: 0.5,
             },
           },
-          drm: {
-            servers: drmConfig?.servers,
-            clearKeys: drmConfig?.clearKeys,
-            logLicenseExchange: true,
+          drm: drmConfig
+            ? {
+              servers: drmConfig.servers,
+              clearKeys: drmConfig.clearKeys,
+              logLicenseExchange: true,
+              // Prefer ClearKey for MOQT streams
+              preferredKeySystems: ["org.w3.clearkey"],
+            }
+            : {
+              // Force no DRM - tell Shaka to not query any key systems
+              servers: {},
+              advanced: {},
+              ignoreDuplicateInitData: true,
+              // Skip key system queries entirely
+              preferredKeySystems: [],
+              keySystemsMapping: {},
+              retryParameters: {
+                maxAttempts: 0, // Don't retry DRM at all
+              },
+            },
+          // For MSF/MOQT configuration
+          manifest: {
+            dash: {
+              ignoreDrmInfo: true,
+            },
+            msf: {
+              // Fingerprint URI for WebTransport with self-signed certs
+              fingerprintUri: fingerprintUri || "",
+            },
           },
           textDisplayer: {
             fontScaleFactor: 1.5,
@@ -188,7 +219,7 @@ export function ShakaPlayer({ src, drmConfig }: ShakaPlayerProps) {
         });
 
         try {
-          await player.load(src);
+          await player.load(src, 0, mimeType);
         } catch (err) {
           if (isMounted) console.error("Error loading video:", err);
         }
@@ -220,7 +251,7 @@ export function ShakaPlayer({ src, drmConfig }: ShakaPlayerProps) {
         playerRef.current = null;
       }
     };
-  }, [src, drmConfig]);
+  }, [src, drmConfig, fingerprintUri]);
 
   return (
     <div>

@@ -41,6 +41,17 @@
 ./scripts/init.sh
 ```
 
+## MoQ
+
+```
+cd moqlivemock
+make
+cd cmd/mlmpub
+./generate-webtransport-cert.sh
+./mlmpub -cert cert-fp.pem -key key-fp.pem -fingerprintport 8081
+```
+
+
 ## REFS
 
 - [Shaka Packager Tutorials](https://shaka-project.github.io/shaka-packager/html/tutorials/tutorials.html)
@@ -50,3 +61,4 @@
 - [Python http.server address CORS](https://fpira.com/blog/2020/05/python-http-server-with-cors)
 - [Netflix cadmium player](https://github.com/hoonseokkim/netflix-cadmium-player)
 - [Inspect PSSH](https://emarsden.github.io/pssh-box-wasm/decode/)
+- [MoQT](https://moqlivemock.demo.osaas.io/warp-player/)

@@ -1,0 +1,3 @@
+[submodule "moqlivemock"]
+	path = moqlivemock
+	url = https://github.com/Eyevinn/moqlivemock.git
