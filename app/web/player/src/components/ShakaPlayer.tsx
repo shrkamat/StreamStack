@@ -1,4 +1,7 @@
 import { useRef, useEffect } from "react";
+import type ShakaTypes from "shaka-player/dist/shaka-player.ui.debug";
+
+type AdInterstitial = ShakaTypes.extern.AdInterstitial;
 type ShakaUiModule = typeof import("shaka-player/dist/shaka-player.ui").default;
 type ShakaPlayerInstance = InstanceType<ShakaUiModule["Player"]>;
 
@@ -123,8 +126,7 @@ export function ShakaPlayer({ src, drmConfig }: ShakaPlayerProps) {
             console.error("[ads] ad-error", e);
           });
 
-          // NOTE: Shaka doesn't expose friendly TS typings for this config.
-          const interstitial: any = {
+          const interstitial: AdInterstitial = {
             id: "dash-midroll-10s",
             groupId: null,
             startTime: 10,
