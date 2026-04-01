@@ -4,7 +4,7 @@
 
 - [ ] Create CMAF (Common Media Application Format) packages using Shaka Packager
   - [x] Basic packaging is done (both hls & dash)
-  - [ ] MP4 deep dive - sk
+  - [ ] MP4 deep dive - sk (In progress)
   - [ ] CMAF deep dive
 - [ ] Playback with shaka-player
   - [x] Basic dash playback
@@ -12,30 +12,16 @@
   - [ ] Understand Shaka player APIs
     - [x] UI, Configuring UI
     - [x] Configuring text displayer
-    - [ ] Screen resolution detection
-      - Not applicable for browser based player, won't do
     - [ ] Error Handling - kk
-    - [ ] Creating accessible buttons - sk
-      - This is more of UI, so probably won't do
     - [ ] Monetization with Ads - kk
-    - [ ] Plugins and Customizing the Build - sk
-      - Do we have usecase of rebuild ? Won't do for now
-    - [ ] Manifest Parser Plugins
-      - Mostly needed for live, won't do for now
-    - [ ] Architecture Diagrams
-      - These are not well documented, so won't do for now
-    - [ ] Service Worker Caching
-    - [ ] Offline Storage and Playback
-    - [ ] Widevine Service Certificates
-      - Looks like it's applicable if you have a custom license server, won't
-      do for now
-    - [ ] FairPlay support
+      - [x] Custom intestrials
+      - [ ] CSAI (Client Side Ad Insertion)
+        - [ ] IMA Google SDK
+        - [ ] VAST
+	- [ ] VMAP
+      - [ ] SSAI (Server Side Ad Insterion)
     - [ ] Application-Level Redirects
-    - [ ] Blob URL
-    - [ ] Selenium Grid Config
     - [ ] Frequently Asked Questions
-    - [ ] Upgrade Guide
-    - [ ] ManifestParser Upgrade Guide
     - [ ] LCEVC Quick Start
     - [ ] Accessibility
 - [ ] Diagnostics
