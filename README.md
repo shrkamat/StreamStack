@@ -41,6 +41,56 @@
 ./scripts/init.sh
 ```
 
+## MoQ
+
+Currently this code is available only on `moq` branch
+
+
+```bash
+git submodule update --init --recursive
+cd moqlivemock
+make
+make mlmpub
+# Not sure if I am missing some step(s) here.
+# I see mlmpub fails if its run from default out dir
+cp out/mlmpub cmd/mlmpub
+cd cmd/mlmpub
+./generate-webtransport-cert.sh
+./mlmpub -cert cert-fp.pem -key key-fp.pem -fingerprintport 8081
+```
+
+Facing issues with Shaka player (& support seems to be limited too). Will try
+with [warp-player](https://github.com/Eyevinn/warp-player) to begin with.
+
+```bash
+cd app/web/warp-player
+npm start
+```
+
+### Status
+
+- With shaka-player both local and demo live playback fails
+- With warp-player local playback is failing, but demo live `https://moqlivemock.demo.osaas.io/moq` is working.
+  - seems to be some certificate / WSL2 networking related issue.
+
+### Debug WebTransport
+
+```js
+// Fetch and convert fingerprint
+const fpHex = await (await fetch('http://172.25.68.255:8081/fingerprint')).text();
+const hexBytes = new Uint8Array(fpHex.trim().length / 2);
+for (let i = 0; i < hexBytes.length; i++) {
+  hexBytes[i] = parseInt(fpHex.slice(2 * i, 2 * i + 2), 16);
+}
+
+// Connect with fingerprint
+const wt = new WebTransport("https://172.25.68.255:4443/moq", {
+  serverCertificateHashes: [{ algorithm: "sha-256", value: hexBytes }]
+});
+wt.ready.then(() => console.log("Connected!")).catch(e => console.error("Failed:", e));
+```
+
+
 ## REFS
 
 - [Shaka Packager Tutorials](https://shaka-project.github.io/shaka-packager/html/tutorials/tutorials.html)
@@ -50,3 +100,4 @@
 - [Python http.server address CORS](https://fpira.com/blog/2020/05/python-http-server-with-cors)
 - [Netflix cadmium player](https://github.com/hoonseokkim/netflix-cadmium-player)
 - [Inspect PSSH](https://emarsden.github.io/pssh-box-wasm/decode/)
+- [MoQT](https://moqlivemock.demo.osaas.io/warp-player/)

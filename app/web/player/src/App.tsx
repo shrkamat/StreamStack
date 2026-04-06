@@ -53,10 +53,32 @@ const ASSETS: Record<string, ShakaPlayerProps> = {
   "SHAKA CAPTION / MULTILANGUAGE": {
     src: "https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd",
   },
+  // 10 - Local moqlivemock (ClearKey encrypted)
+  "SHAKA EXPERIMETAL MOQT LOCAL": {
+    src: "https://localhost:4443/moq",
+    mimeType: "application/msf",
+    fingerprintUri: "http://localhost:8081/fingerprint",
+    drmConfig: {
+      servers: {
+        "org.w3.clearkey": "http://localhost:4443/clearkey",
+      },
+    },
+  },
+  // 11 - Remote demo (has DRM-protected tracks)
+  "SHAKA EXPERIMETAL MOQT DEMO": {
+    // https://github.com/shaka-project/shaka-player/pull/9409
+    src: "https://moqlivemock.demo.osaas.io/moq",
+    mimeType: "application/msf",
+    drmConfig: {
+      servers: {
+        "org.w3.clearkey": "https://moqlivemock.demo.osaas.io/clearkey",
+      },
+    },
+  },
 };
 
 const ASSET_KEYS = Object.keys(ASSETS);
-const DEFAULT_ASSET_KEY = ASSET_KEYS[9];
+const DEFAULT_ASSET_KEY = ASSET_KEYS[10];
 
 function App() {
   const asset: ShakaPlayerProps = ASSETS[DEFAULT_ASSET_KEY];
