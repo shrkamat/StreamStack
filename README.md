@@ -59,7 +59,7 @@ cd cmd/mlmpub
 ```
 
 Facing issues with Shaka player (& support seems to be limited too). Will try
-with [warp-player](https://github.com/Eyevinn/warp-player) to being with.
+with [warp-player](https://github.com/Eyevinn/warp-player) to begin with.
 
 ```bash
 cd app/web/warp-player
