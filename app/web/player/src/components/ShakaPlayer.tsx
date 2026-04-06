@@ -5,8 +5,8 @@ type AdInterstitial = ShakaTypes.extern.AdInterstitial;
 type ShakaUiModule = typeof import("shaka-player/dist/shaka-player.ui").default;
 type ShakaPlayerInstance = InstanceType<ShakaUiModule["Player"]>;
 
-const DASH_AD_URI: string =
-  "";
+// temporarily disable ad support
+const DASH_AD_URI: string = "";
 const DASH_AD_MIME: string = "application/dash+xml";
 
 // Extend Window interface
@@ -28,15 +28,15 @@ const shaka: ShakaUiModule & {
   };
 } = (isDebug
   ? (await import("shaka-player/dist/shaka-player.experimental.debug.js"))
-    .default
+      .default
   : // Use experimental build (not UI) to support MOQT
-  (await import("shaka-player/dist/shaka-player.experimental.js"))
-    .default) as unknown as ShakaUiModule & {
-      log?: {
-        Level: { V1: number; V2: number; DEBUG: number };
-        setLevel(level: number): void;
-      };
-    };
+    (await import("shaka-player/dist/shaka-player.experimental.js"))
+      .default) as unknown as ShakaUiModule & {
+  log?: {
+    Level: { V1: number; V2: number; DEBUG: number };
+    setLevel(level: number): void;
+  };
+};
 
 // Define the shape of the props the component accepts
 export interface ShakaPlayerProps {
@@ -50,7 +50,12 @@ export interface ShakaPlayerProps {
   fingerprintUri?: string;
 }
 
-export function ShakaPlayer({ src, mimeType, drmConfig, fingerprintUri }: ShakaPlayerProps) {
+export function ShakaPlayer({
+  src,
+  mimeType,
+  drmConfig,
+  fingerprintUri,
+}: ShakaPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const playerRef = useRef<ShakaPlayerInstance | null>(null);
@@ -184,24 +189,24 @@ export function ShakaPlayer({ src, mimeType, drmConfig, fingerprintUri }: ShakaP
           },
           drm: drmConfig
             ? {
-              servers: drmConfig.servers,
-              clearKeys: drmConfig.clearKeys,
-              logLicenseExchange: true,
-              // Prefer ClearKey for MOQT streams
-              preferredKeySystems: ["org.w3.clearkey"],
-            }
+                servers: drmConfig.servers,
+                clearKeys: drmConfig.clearKeys,
+                logLicenseExchange: true,
+                // Prefer ClearKey for MOQT streams
+                preferredKeySystems: ["org.w3.clearkey"],
+              }
             : {
-              // Force no DRM - tell Shaka to not query any key systems
-              servers: {},
-              advanced: {},
-              ignoreDuplicateInitData: true,
-              // Skip key system queries entirely
-              preferredKeySystems: [],
-              keySystemsMapping: {},
-              retryParameters: {
-                maxAttempts: 0, // Don't retry DRM at all
+                // Force no DRM - tell Shaka to not query any key systems
+                servers: {},
+                advanced: {},
+                ignoreDuplicateInitData: true,
+                // Skip key system queries entirely
+                preferredKeySystems: [],
+                keySystemsMapping: {},
+                retryParameters: {
+                  maxAttempts: 0, // Don't retry DRM at all
+                },
               },
-            },
           // For MSF/MOQT configuration
           manifest: {
             dash: {
