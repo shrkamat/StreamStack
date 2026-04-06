@@ -73,6 +73,23 @@ npm start
 - With warp-player local playback is failing, but demo live `https://moqlivemock.demo.osaas.io/moq` is working.
   - seems to be some certificate / WSL2 networking related issue.
 
+### Debug WebTransport
+
+```js
+// Fetch and convert fingerprint
+const fpHex = await (await fetch('http://172.25.68.255:8081/fingerprint')).text();
+const hexBytes = new Uint8Array(fpHex.trim().length / 2);
+for (let i = 0; i < hexBytes.length; i++) {
+  hexBytes[i] = parseInt(fpHex.slice(2 * i, 2 * i + 2), 16);
+}
+
+// Connect with fingerprint
+const wt = new WebTransport("https://172.25.68.255:4443/moq", {
+  serverCertificateHashes: [{ algorithm: "sha-256", value: hexBytes }]
+});
+wt.ready.then(() => console.log("Connected!")).catch(e => console.error("Failed:", e));
+```
+
 
 ## REFS
 
