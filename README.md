@@ -43,12 +43,27 @@
 
 ## MoQ
 
-```
+Currently this code is available only on `moq` branch
+
+```bash
+git submodule update --init --recursive
 cd moqlivemock
 make
+make mlmpub
+# Not sure if I am missing some step(s) here.
+# I see mlmpub fails if its run from default out dir
+cp out/mlmpub cmd/mlmpub
 cd cmd/mlmpub
 ./generate-webtransport-cert.sh
 ./mlmpub -cert cert-fp.pem -key key-fp.pem -fingerprintport 8081
+```
+
+Facing issues with Shaka player (& support seems to be limited too). Will try
+with [warp-player](https://github.com/Eyevinn/warp-player) to being with.
+
+```bash
+cd app/web/warp-player
+npm start
 ```
 
 

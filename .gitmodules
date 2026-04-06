@@ -1,3 +1,6 @@
 [submodule "moqlivemock"]
 	path = moqlivemock
 	url = https://github.com/Eyevinn/moqlivemock.git
+[submodule "app/web/warp-player"]
+	path = app/web/warp-player
+	url = https://github.com/Eyevinn/warp-player.git
