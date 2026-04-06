@@ -45,6 +45,7 @@
 
 Currently this code is available only on `moq` branch
 
+
 ```bash
 git submodule update --init --recursive
 cd moqlivemock
@@ -65,6 +66,12 @@ with [warp-player](https://github.com/Eyevinn/warp-player) to begin with.
 cd app/web/warp-player
 npm start
 ```
+
+### Status
+
+- With shaka-player both local and demo live playback fails
+- With warp-player local playback is failing, but demo live `https://moqlivemock.demo.osaas.io/moq` is working.
+  - seems to be some certificate / WSL2 networking related issue.
 
 
 ## REFS
