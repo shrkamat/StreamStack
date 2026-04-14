@@ -1,13 +1,10 @@
 import { useRef, useEffect } from "react";
-import type ShakaTypes from "shaka-player/dist/shaka-player.ui.debug";
-
-type AdInterstitial = ShakaTypes.extern.AdInterstitial;
 type ShakaUiModule = typeof import("shaka-player/dist/shaka-player.ui").default;
 type ShakaPlayerInstance = InstanceType<ShakaUiModule["Player"]>;
 
 const DASH_AD_URI: string =
-  "http://localhost:8080/ForBiggerBlazes/clear/h264.mpd";
-const DASH_AD_MIME: string = "application/dash+xml";
+  "http://localhost:8080/ForBiggerBlazes/clear/h264_master.m3u8";
+const DASH_AD_MIME: string = "application/vnd.apple.mpegurl";
 
 // Extend Window interface
 declare global {
@@ -126,7 +123,8 @@ export function ShakaPlayer({ src, drmConfig }: ShakaPlayerProps) {
             console.error("[ads] ad-error", e);
           });
 
-          const interstitial: AdInterstitial = {
+          // NOTE: Shaka doesn't expose friendly TS typings for this config.
+          const interstitial: any = {
             id: "dash-midroll-10s",
             groupId: null,
             startTime: 10,
