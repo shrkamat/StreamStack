@@ -1,13 +1,50 @@
 import { useRef, useEffect } from "react";
-import type ShakaTypes from "shaka-player/dist/shaka-player.ui.debug";
-
-type AdInterstitial = ShakaTypes.extern.AdInterstitial;
 type ShakaUiModule = typeof import("shaka-player/dist/shaka-player.ui").default;
 type ShakaPlayerInstance = InstanceType<ShakaUiModule["Player"]>;
 
-const DASH_AD_URI: string =
-  "http://localhost:8080/ForBiggerBlazes/clear/h264.mpd";
-const DASH_AD_MIME: string = "application/dash+xml";
+const IMA_SDK_SRC = "https://imasdk.googleapis.com/js/sdkloader/ima3.js";
+// Google IMA sample VMAP tag (pre/mid/post via ad rules). Replace with your own GAM VMAP tag.
+// Tip: keep `correlator=` at the end; we append a timestamp to avoid caching.
+const IMA_AD_TAG_URI =
+  "https://pubads.g.doubleclick.net/gampad/ads?" +
+  "sz=640x480&" +
+  "iu=/124319096/external/ad_rule_samples&" +
+  "ciu_szs=300x250&" +
+  "ad_rule=1&" +
+  "impl=s&" +
+  "gdfp_req=1&" +
+  "env=vp&" +
+  "output=vmap&" +
+  "unviewed_position_start=1&" +
+  "cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpost&" +
+  "cmsid=496&" +
+  "vid=short_onecue&" +
+  "correlator=";
+
+function loadImaSdk(): Promise<void> {
+  if ((window as any).google?.ima?.AdsLoader) return Promise.resolve();
+
+  const existing = document.querySelector<HTMLScriptElement>(
+    `script[data-ima-sdk="true"]`,
+  );
+  if (existing) {
+    return new Promise((resolve, reject) => {
+      existing.addEventListener("load", () => resolve(), { once: true });
+      existing.addEventListener("error", () => reject(), { once: true });
+    });
+  }
+
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = IMA_SDK_SRC;
+    script.async = true;
+    script.defer = true;
+    script.dataset.imaSdk = "true";
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Failed to load Google IMA SDK"));
+    document.head.appendChild(script);
+  });
+}
 
 // Extend Window interface
 declare global {
@@ -46,6 +83,7 @@ export interface ShakaPlayerProps {
 
 export function ShakaPlayer({ src, drmConfig }: ShakaPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const adContainerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const playerRef = useRef<ShakaPlayerInstance | null>(null);
 
@@ -57,6 +95,7 @@ export function ShakaPlayer({ src, drmConfig }: ShakaPlayerProps) {
     let isMounted: boolean = true;
     // TODO: understand this type definition, isn't there a Shaka provided type ?
     let uiOverlay: { destroy: () => void } | null = null;
+    let removeImaRetryListener: (() => void) | null = null;
 
     const initPlayer = async () => {
       if (isDebug && shaka.log) {
@@ -95,7 +134,7 @@ export function ShakaPlayer({ src, drmConfig }: ShakaPlayerProps) {
         player.addEventListener("error", onErrorEvent);
         player.setVideoContainer(containerRef.current!);
 
-        // Register custom interstitial ad (DASH) + log ad lifecycle.
+        // Client-side ads via Google IMA SDK.
         const adManager = player.getAdManager();
         if (adManager) {
           adManager.addEventListener("ad-break-started", (e: unknown) => {
@@ -126,40 +165,58 @@ export function ShakaPlayer({ src, drmConfig }: ShakaPlayerProps) {
             console.error("[ads] ad-error", e);
           });
 
-          const interstitial: AdInterstitial = {
-            id: "dash-midroll-10s",
-            groupId: null,
-            startTime: 10,
-            endTime: null,
-            uri: DASH_AD_URI,
-            mimeType: DASH_AD_MIME,
-            isSkippable: true,
-            skipOffset: 5,
-            skipFor: null,
-            canJump: false,
-            resumeOffset: null,
-            playoutLimit: null,
-            once: true,
-            pre: false,
-            post: false,
-            timelineRange: false,
-            loop: false,
-            overlay: null,
-            displayOnBackground: false,
-            currentVideo: null,
-            background: null,
-            clickThroughUrl: null,
-            tracking: null,
-          };
+          const adContainer = adContainerRef.current;
+          if (!adContainer) {
+            console.warn("[ads] ad container is missing; IMA ads disabled");
+          } else {
+            // Required for IMA client-side ads in Shaka 5.x.
+            adManager.setContainers(adContainer, adContainer);
 
-          try {
-            adManager.addCustomInterstitial(interstitial);
-            console.log("[ads] registered DASH interstitial", {
-              startTime: interstitial.startTime,
-              uri: interstitial.uri,
-            });
-          } catch (e) {
-            console.error("[ads] failed to register interstitial", e);
+            const requestAds = async () => {
+              await loadImaSdk();
+
+              const googleIma = (window as any).google?.ima;
+              if (!googleIma?.AdsRequest) {
+                throw new Error("Google IMA SDK loaded but google.ima missing");
+              }
+
+              const imaRequest = new googleIma.AdsRequest();
+              // Add a changing correlator to avoid cached ad responses.
+              imaRequest.adTagUrl = `${IMA_AD_TAG_URI}${Date.now()}`;
+
+              const videoEl = videoRef.current;
+              const width = videoEl?.clientWidth || 640;
+              const height = videoEl?.clientHeight || 360;
+              imaRequest.linearAdSlotWidth = width;
+              imaRequest.linearAdSlotHeight = height;
+              imaRequest.nonLinearAdSlotWidth = width;
+              imaRequest.nonLinearAdSlotHeight = Math.floor(height / 3);
+
+              adManager.requestClientSideAds(imaRequest, null);
+              console.log("[ads] requested IMA ads", { adTagUrl: imaRequest.adTagUrl });
+            };
+
+            try {
+              // Best-effort: may fail if the browser requires a user gesture.
+              await requestAds();
+            } catch (e) {
+              console.warn(
+                "[ads] IMA ad request failed (often needs user gesture); will retry on first interaction",
+                e,
+              );
+
+              const onFirstGesture = () => {
+                requestAds().catch((err: unknown) => {
+                  console.error("[ads] IMA retry failed", err);
+                });
+              };
+              containerRef.current?.addEventListener("pointerdown", onFirstGesture, {
+                once: true,
+              });
+              removeImaRetryListener = () => {
+                containerRef.current?.removeEventListener("pointerdown", onFirstGesture);
+              };
+            }
           }
         } else {
           console.warn("[ads] player.getAdManager() returned null/undefined");
@@ -206,6 +263,14 @@ export function ShakaPlayer({ src, drmConfig }: ShakaPlayerProps) {
     return () => {
       isMounted = false;
       console.log("Cleaning up Shaka Player resources.");
+      if (removeImaRetryListener) {
+        try {
+          removeImaRetryListener();
+        } catch {
+          // ignore
+        }
+        removeImaRetryListener = null;
+      }
       if (uiOverlay) {
         try {
           uiOverlay.destroy();
@@ -231,6 +296,11 @@ export function ShakaPlayer({ src, drmConfig }: ShakaPlayerProps) {
           data-shaka-player-container
           className="video-container"
         >
+          <div
+            ref={adContainerRef}
+            className="shaka-ad-container"
+            aria-hidden="true"
+          />
           <video
             id="video"
             ref={videoRef}
